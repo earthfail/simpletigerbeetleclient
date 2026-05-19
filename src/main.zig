@@ -80,7 +80,7 @@ pub fn mainEpoll(init: std.process.Init) !void {
     eblk: while (__commands_max > 0) : (__commands_max -= 1) {
         const len = linux.epoll_wait(@intCast(epoll_fd), @ptrCast(&events), events.len, epoll_timeout);
         if (len == 0) {
-            log.info("Timeout reached without any events", .{});
+            // log.info("Timeout reached without any events", .{});
             continue;
         }
         var events_program_len = len;
@@ -128,6 +128,7 @@ pub fn mainEpoll(init: std.process.Init) !void {
                                 \\ h: for this message
                                 \\ q: quit
                                 \\ c: toggle compile go client and run on main.go save ({})
+                                \\ f: force compile go client
                                 \\
                             , .{watch_go_client});
                             // try stdout.flush();
@@ -142,6 +143,7 @@ pub fn mainEpoll(init: std.process.Init) !void {
                                 _ = linux.inotify_rm_watch(@intCast(inotify_fd), @intCast(go_client_wd));
                             }
                         },
+                        .force_compile => try compileGo(&go_process, io),
                         .nop => {
                             log.debug("nop", .{});
                         },
@@ -286,6 +288,8 @@ fn byteCommand(b: u8) Command {
         return .quit;
     } else if (b == 'c') {
         return .compile_go;
+    } else if (b == 'f') {
+        return .force_compile;
     }
     return .nop;
 }
@@ -318,6 +322,7 @@ const Command = enum {
     help,
     quit,
     compile_go,
+    force_compile,
     nop,
 };
 
