@@ -1,5 +1,7 @@
 const std = @import("std");
+const ArrayList = std.ArrayList;
 const Io = std.Io;
+const assert = std.debug.assert;
 const log = std.log.scoped(.repl);
 
 pub fn main(init: std.process.Init) !void {
